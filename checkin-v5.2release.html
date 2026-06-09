@@ -37509,10 +37509,9 @@
                     }
 
                     this.remove_loading_mark();
-                    // 只有在有联系人时才启动定时同步，避免无限循环
-                    if (result.length > 0) {
-                        this.start_timer__sync(false);
-                    }
+                    // 无论是否有联系人，都启动定时同步
+                    // 这样即使没有联系人，也能定期检查是否有新联系人加入
+                    this.start_timer__sync(false);
                 } catch (error) {
                     this.remove_loading_mark();
                     MessageMark.report(error);
@@ -37582,9 +37581,8 @@
                     // 没有现有联系人时，尝试获取新的联系人列表
                     // 这样新添加的好友可以被显示出来，移除的好友也会消失
                     this.sync_contacts();
-                    if (this.is_active()) this.timer__sync = setTimeout(() => {
-                        this.sync()
-                    }, this.ws_isopen() ? this.interval__sync__ws : this.interval__sync);
+                    // 在 sync_contacts 完成后，立即移除转圈标记，避免长时间显示
+                    // 因为 sync_contacts 内部会调用 start_timer__sync，处理转圈状态
                     return;
                 }
 
