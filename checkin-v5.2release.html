@@ -37509,7 +37509,10 @@
                     }
 
                     this.remove_loading_mark();
-                    this.start_timer__sync(false);
+                    // 只有在有联系人时才启动定时同步，避免无限循环
+                    if (result.length > 0) {
+                        this.start_timer__sync(false);
+                    }
                 } catch (error) {
                     this.remove_loading_mark();
                     MessageMark.report(error);
