@@ -36555,7 +36555,9 @@
                 this.ws_close();
                 this.stop_timer__sync();
                 for (const mainaction of this.contact_items()) {
-                    mainaction.e_online_status.dataset.onlineStatus = "offline";
+                    if (mainaction.e_online_status) {
+                        mainaction.e_online_status.dataset.onlineStatus = "offline";
+                    }
                 }
             }
 
@@ -36729,7 +36731,9 @@
                 })();
 
                 mainaction.e_online_status = li.querySelector(":scope .chat-contact-online-status");
-                mainaction.e_online_status.dataset.onlineStatus = "offline";
+                if (mainaction.e_online_status) {
+                    mainaction.e_online_status.dataset.onlineStatus = "offline";
+                }
 
                 mainaction.e_pin_icon = li.querySelector(":scope .chat-contact-pin-icon");
                 mainaction.e_mute_icon = li.querySelector(":scope .chat-contact-mute-icon");
@@ -36787,47 +36791,59 @@
                     }
                 }
 
-                if (status_attr.type === subviews.Chat.receiver_type.group) {
-                    // 修改: 至少2人在线才显示绿灯
-                    item.e_online_status.dataset.onlineStatus = status_attr.online_count >= 2 ? "online" : "offline";
-                } else if (status_attr.type === subviews.Chat.receiver_type.user) {
-                    item.e_online_status.dataset.onlineStatus = status_attr.online_status === ChatDashboardWrapper.online_status.online ? "online" : "offline";
+                if (item.e_online_status) {
+                    if (status_attr.type === subviews.Chat.receiver_type.group) {
+                        // 修改: 至少2人在线才显示绿灯
+                        item.e_online_status.dataset.onlineStatus = status_attr.online_count >= 2 ? "online" : "offline";
+                    } else if (status_attr.type === subviews.Chat.receiver_type.user) {
+                        item.e_online_status.dataset.onlineStatus = status_attr.online_status === ChatDashboardWrapper.online_status.online ? "online" : "offline";
+                    }
                 }
-                item.e_sst_lastmsgtime.textContent = format_timestamp_utc8_day(status_attr.last_message_time);
+                if (item.e_sst_lastmsgtime) {
+                    item.e_sst_lastmsgtime.textContent = format_timestamp_utc8_day(status_attr.last_message_time);
+                }
                 const string_activity = this.format_contact_item_status__activity(item, status_attr);
                 if (status_attr.unread_count > 0) {
-                    item.e_ssb_unreadcount.classList.remove("hidden");
-                    // 重要消息处理：给 chat-contact 元素添加呼吸边框效果
-                    if (status_attr.has_important) {
-                        item.e_ssb_unreadcount.classList.add("important");
-                        if (item.element) item.element.classList.add("important");
-                        // 显示未读数
-                        item.e_ssb_unreadcount.textContent = status_attr.unread_count;
-                    } else {
-                        item.e_ssb_unreadcount.classList.remove("important");
-                        if (item.element) item.element.classList.remove("important");
-                        item.e_ssb_unreadcount.textContent = status_attr.unread_count;
-                    }
-                    item.e_ssb_lastmsgview.textContent = "[系统] 点击查看未读。"
-                    item.e_ssb_lastmsgview.dataset.hasActivity = "false";
-                } else {
-                    item.e_ssb_unreadcount.classList.add("hidden");
-                    item.e_ssb_unreadcount.classList.remove("important");
-                    if (item.element) item.element.classList.remove("important");
-                    if (string_activity.length > 0) {
-                        item.e_ssb_lastmsgview.textContent = string_activity;
-                        item.e_ssb_lastmsgview.dataset.hasActivity = "true";
-                    } else {
-                        if (item.draft_text.length > 0) {
-                            item.e_ssb_lastmsgview.textContent = "[草稿] " + this.format_text_for_msgview(item.draft_text);
-                            item.e_ssb_lastmsgview.dataset.hasActivity = "false";
+                    if (item.e_ssb_unreadcount) {
+                        item.e_ssb_unreadcount.classList.remove("hidden");
+                        // 重要消息处理：给 chat-contact 元素添加呼吸边框效果
+                        if (status_attr.has_important) {
+                            item.e_ssb_unreadcount.classList.add("important");
+                            if (item.element) item.element.classList.add("important");
+                            // 显示未读数
+                            item.e_ssb_unreadcount.textContent = status_attr.unread_count;
                         } else {
-                            if (item.msgs.length === 0) {
-                                item.e_ssb_lastmsgview.textContent = full_width_space;
+                            item.e_ssb_unreadcount.classList.remove("important");
+                            if (item.element) item.element.classList.remove("important");
+                            item.e_ssb_unreadcount.textContent = status_attr.unread_count;
+                        }
+                    }
+                    if (item.e_ssb_lastmsgview) {
+                        item.e_ssb_lastmsgview.textContent = "[系统] 点击查看未读。"
+                        item.e_ssb_lastmsgview.dataset.hasActivity = "false";
+                    }
+                } else {
+                    if (item.e_ssb_unreadcount) {
+                        item.e_ssb_unreadcount.classList.add("hidden");
+                        item.e_ssb_unreadcount.classList.remove("important");
+                    }
+                    if (item.element) item.element.classList.remove("important");
+                    if (item.e_ssb_lastmsgview) {
+                        if (string_activity.length > 0) {
+                            item.e_ssb_lastmsgview.textContent = string_activity;
+                            item.e_ssb_lastmsgview.dataset.hasActivity = "true";
+                        } else {
+                            if (item.draft_text.length > 0) {
+                                item.e_ssb_lastmsgview.textContent = "[草稿] " + this.format_text_for_msgview(item.draft_text);
                                 item.e_ssb_lastmsgview.dataset.hasActivity = "false";
                             } else {
-                                item.e_ssb_lastmsgview.textContent = await this.format_contact_item_status__lastmsgview(item.msgs.at(-1));
-                                item.e_ssb_lastmsgview.dataset.hasActivity = "false";
+                                if (item.msgs.length === 0) {
+                                    item.e_ssb_lastmsgview.textContent = full_width_space;
+                                    item.e_ssb_lastmsgview.dataset.hasActivity = "false";
+                                } else {
+                                    item.e_ssb_lastmsgview.textContent = await this.format_contact_item_status__lastmsgview(item.msgs.at(-1));
+                                    item.e_ssb_lastmsgview.dataset.hasActivity = "false";
+                                }
                             }
                         }
                     }
